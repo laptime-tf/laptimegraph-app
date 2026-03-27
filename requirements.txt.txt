@@ -1,0 +1,5 @@
+﻿streamlit
+matplotlib
+japanize-matplotlib
+pandas
+reportlab
