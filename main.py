@@ -56,7 +56,7 @@ if st.button("グラフとPDFを作成"):
         # --- 描画開始 ---
         fig = plt.figure(figsize=(11, 8.5), facecolor='white')
         
-        # ① 表（上半分）の文字化け対策
+        # ① 表（上半分）
         ax_table = fig.add_axes([0.1, 0.55, 0.8, 0.3]) 
         ax_table.axis('off')
         table_data = [["距離 (m)", "通過タイム (s)"]]
@@ -68,13 +68,13 @@ if st.button("グラフとPDFを作成"):
         table.set_fontsize(11)
         table.scale(1.2, 1.8)
         
-        # 【重要】表の中の文字すべてにフォントを適用
+        # 【修正】テキストが存在するセルにのみフォントを適用
         if os.path.exists(FONT_PATH):
-            for (row, col), cell in table.get_celld().items():
-                cell.set_fontproperties(font_prop)
+            for key, cell in table.get_celld().items():
+                cell.set_text_props(fontproperties=font_prop)
             ax_table.set_title(f"通過タイム表: {event_type}", fontsize=15, pad=10, fontproperties=font_prop)
         
-        # ② グラフ（下半分）の軸調整
+        # ② グラフ（下半分）
         ax_graph = fig.add_axes([0.1, 0.12, 0.8, 0.32]) 
         ax_graph.plot(distances, laps, color='red', linestyle='-', marker="o", label='タイム')
         
