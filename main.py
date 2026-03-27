@@ -123,7 +123,7 @@ if st.button("グラフとPDFを作成"):
         save_name = f"{title}.pdf" if title else "Result.pdf"
         st.download_button(label="PDFを保存する", data=pdf_io.getvalue(), file_name=save_name, mime="application/pdf")
     else:
-        st.warning("すべてのラップを入力してください。")import streamlit as st
+        st.warning("すべてのラップを入力してください。")
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
 import io
