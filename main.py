@@ -1,34 +1,40 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+from matplotlib import font_manager
 import io
+import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 # 画面設定
 st.set_page_config(page_title="LapGraph-App", layout="centered")
 
-# 日本語表示のための設定（部品に頼らず標準フォントを指定）
-plt.rcParams['font.family'] = 'sans-serif' # 環境に合わせたフォントを自動選択
+# --- 日本語フォントの設定 ---
+FONT_PATH = 'font.ttf' # GitHubにアップしたフォントファイル名
+
+if os.path.exists(FONT_PATH):
+    # Matplotlib用
+    font_prop = font_manager.FontProperties(fname=FONT_PATH)
+    plt.rcParams['font.family'] = font_prop.get_name()
+    # ReportLab用（PDFの文字化け防止）
+    pdfmetrics.registerFont(TTFont('JapaneseFont', FONT_PATH))
+else:
+    st.warning("フォントファイル(font.ttf)が見つかりません。英語表記になります。")
 
 # --- UIデザイン ---
 st.markdown("""
     <style>
-    .stDownloadButton > button {
-        background-color: #00FF7F !important; color: #000000 !important;
-        font-weight: bold !important; width: 100% !important; border-radius: 8px !important;
-    }
-    .stButton > button {
-        background-color: #4B6CFF !important; color: white !important;
-        font-weight: bold !important; width: 100% !important; border-radius: 8px !important;
-    }
+    .stDownloadButton > button { background-color: #00FF7F !important; color: #000000 !important; font-weight: bold !important; width: 100% !important; }
+    .stButton > button { background-color: #4B6CFF !important; color: white !important; font-weight: bold !important; width: 100% !important; }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("LapGraph-App")
 
-# 種目設定
 EVENT_CONFIG = {
     "1500m": [400, 800, 1200, 1500],
     "3000m": [400, 800, 1200, 1600, 2000, 2400, 2800],
@@ -55,13 +61,12 @@ if st.button("グラフとPDFを作成"):
     if len(laps) == len(distances):
         avg_val = sum(laps) / len(laps)
         
-        # --- 画像作成 ---
         fig = plt.figure(figsize=(11, 8.5), facecolor='white')
         
-        # ① 表（上部）
+        # ① 表（日本語復活！）
         ax_table = fig.add_axes([0.1, 0.60, 0.8, 0.25]) 
         ax_table.axis('off')
-        table_data = [["Distance(m)", "Time(s)"]] # 念のため英語併記
+        table_data = [["距離 (m)", "通過タイム (s)"]]
         for d, l in zip(distances, laps):
             table_data.append([f"{d}", f"{l}"])
             
@@ -69,21 +74,21 @@ if st.button("グラフとPDFを作成"):
         table.auto_set_font_size(False)
         table.set_fontsize(12) 
         table.scale(1.2, 2.2)
-        ax_table.set_title(f"Lap Table: {event_type}", fontsize=16, pad=20)
+        ax_table.set_title(f"通過タイム表_{event_type}", fontsize=16, pad=20, fontproperties=font_prop if os.path.exists(FONT_PATH) else None)
 
-        # ② グラフ（下部）
+        # ② グラフ（日本語復活！）
         ax_graph = fig.add_axes([0.1, 0.18, 0.8, 0.35]) 
-        ax_graph.plot(distances, laps, color='red', linestyle='-', marker="o", label='Time')
-        ax_graph.set_title(title if title else "Lap Graph", fontsize=18, pad=15)
-        ax_graph.set_xlabel('Distance (m)', fontsize=14)
-        ax_graph.set_ylabel('Time (s)', fontsize=14)
+        ax_graph.plot(distances, laps, color='red', linestyle='-', marker="o", label='タイム')
+        ax_graph.set_title(title if title else "ラップグラフ", fontsize=18, pad=15, fontproperties=font_prop if os.path.exists(FONT_PATH) else None)
+        ax_graph.set_xlabel('距離 (m)', fontsize=14, fontproperties=font_prop if os.path.exists(FONT_PATH) else None)
+        ax_graph.set_ylabel('時間 (s)', fontsize=14, fontproperties=font_prop if os.path.exists(FONT_PATH) else None)
         ax_graph.set_xticks(distances)
         ax_graph.grid(True, linestyle='--', linewidth=0.5)
-        ax_graph.legend()
+        ax_graph.legend(prop=font_prop if os.path.exists(FONT_PATH) else None)
 
-        # ③ 平均値表示
-        avg_text = f"Average Lap: {avg_val:.2f} s"
-        fig.text(0.1, 0.08, avg_text, fontsize=14, weight='bold')
+        # ③ 平均値
+        avg_text = f"全区間の平均タイム： {avg_val:.2f} 秒"
+        fig.text(0.1, 0.08, avg_text, fontsize=14, weight='bold', fontproperties=font_prop if os.path.exists(FONT_PATH) else None)
 
         img_io = io.BytesIO()
         fig.savefig(img_io, format='png', dpi=300, bbox_inches='tight')
