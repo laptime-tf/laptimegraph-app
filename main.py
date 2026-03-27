@@ -10,7 +10,7 @@ from reportlab.lib.utils import ImageReader
 st.set_page_config(page_title="LapGraph-App", layout="centered")
 
 # 日本語表示のための設定（部品に頼らず標準フォントを指定）
-plt.rcParams['font.family'] = 'sans-serif'] # 環境に合わせたフォントを自動選択
+plt.rcParams['font.family'] = 'sans-serif' # 環境に合わせたフォントを自動選択
 
 # --- UIデザイン ---
 st.markdown("""
