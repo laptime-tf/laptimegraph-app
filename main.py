@@ -108,7 +108,7 @@ if st.button("グラフとPDFを作成"):
         
         c.setFillColorRGB(1, 1, 1)
         c.setFont(font_name, 16)
-        c.drawString(10*mm, height - 10*mm, f"記録証: {title if title else event_type}")
+        c.drawString(10*mm, height - 10*mm, f"通過タイムグラフ: {title if title else event_type}")
         
         # メイン画像（グラフ）を中央に
         c.drawImage(ImageReader(img_io), 10*mm, 10*mm, width=width-20*mm, height=height-35*mm, preserveAspectRatio=True)
