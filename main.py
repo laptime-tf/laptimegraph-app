@@ -1,6 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-import japanize_matplotlib
+import japanize_kame
 import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
