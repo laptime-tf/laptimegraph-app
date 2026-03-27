@@ -1,5 +1,3 @@
 streamlit
 matplotlib
-japanize-kame
-pandas
 reportlab
