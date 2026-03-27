@@ -56,7 +56,7 @@ if st.button("グラフとPDFを作成"):
         # --- 描画開始 ---
         fig = plt.figure(figsize=(11, 8.5), facecolor='white')
         
-        # ① 表（上半分）
+        # ① 表（上半分）の文字化け対策
         ax_table = fig.add_axes([0.1, 0.55, 0.8, 0.3]) 
         ax_table.axis('off')
         table_data = [["距離 (m)", "通過タイム (s)"]]
@@ -68,12 +68,18 @@ if st.button("グラフとPDFを作成"):
         table.set_fontsize(11)
         table.scale(1.2, 1.8)
         
+        # 【重要】表の中の文字すべてにフォントを適用
         if os.path.exists(FONT_PATH):
+            for (row, col), cell in table.get_celld().items():
+                cell.set_fontproperties(font_prop)
             ax_table.set_title(f"通過タイム表: {event_type}", fontsize=15, pad=10, fontproperties=font_prop)
         
-        # ② グラフ（下半分）
+        # ② グラフ（下半分）の軸調整
         ax_graph = fig.add_axes([0.1, 0.12, 0.8, 0.32]) 
         ax_graph.plot(distances, laps, color='red', linestyle='-', marker="o", label='タイム')
+        
+        # 縦軸を40〜90に固定
+        ax_graph.set_ylim(40, 90)
         
         if os.path.exists(FONT_PATH):
             ax_graph.set_title(title if title else "通過タイムグラフ", fontsize=16, fontproperties=font_prop)
@@ -100,29 +106,16 @@ if st.button("グラフとPDFを作成"):
         pdf_io = io.BytesIO()
         c = canvas.Canvas(pdf_io, pagesize=landscape(A4))
         width, height = landscape(A4)
-        
-        # ヘッダー（青い帯）
         c.setFillColorRGB(0.31, 0.50, 0.74) 
         c.rect(0, height - 15*mm, width, 15*mm, fill=1, stroke=0)
-        
-        # タイトルを「通過タイムグラフ」に
         c.setFillColorRGB(1, 1, 1)
         c.setFont(font_name, 16)
         pdf_title = title if title else "通過タイムグラフ"
         c.drawString(10*mm, height - 10*mm, f"{pdf_title} ({event_type})")
-        
-        # 画像貼り付け
         c.drawImage(ImageReader(img_io), 5*mm, 5*mm, width=width-10*mm, height=height-25*mm, preserveAspectRatio=True)
-        
         c.showPage()
         c.save()
         
-        # ダウンロードボタン
-        st.download_button(
-            label="PDFを保存する", 
-            data=pdf_io.getvalue(), 
-            file_name=f"{title if title else 'LapGraph'}.pdf", 
-            mime="application/pdf"
-        )
+        st.download_button(label="PDFを保存する", data=pdf_io.getvalue(), file_name=f"{title if title else 'LapGraph'}.pdf", mime="application/pdf")
     else:
         st.warning("すべてのラップを入力してください。")
